@@ -1,0 +1,25 @@
+# Credentials - never commit
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# Test reports
+reports/
+
+# Playwright artifacts
+test-results/
+playwright-report/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
