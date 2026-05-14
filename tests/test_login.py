@@ -1,4 +1,6 @@
 import pytest
+from conftest import credentials
+from pages import login_page
 from pages.login_page import LoginPage
 
 
@@ -24,42 +26,49 @@ class TestLoginFailure:
         login_page.login("notareal@fakeemail.com", "SomePassword123!")
         assert login_page.get_error_message(), "Expected an error message but none appeared"
 
-    def test_empty_email(self, login_page: LoginPage, credentials):
+    def test_empty_email(self, login_page: LoginPage):
         """Submitting with no email should show an error."""
-        login_page.login("", credentials["password"])
+        login_page.enter_email("")
         assert login_page.get_error_message(), "Expected an error message but none appeared"
 
     def test_empty_password(self, login_page: LoginPage, credentials):
-        """Submitting with no password should show an error."""
-        login_page.login(credentials["email"], "")
+        """Submitting with an empty password should show an error."""
+        login_page.enter_email(credentials["email"])
+        login_page.password_input.wait_for(state="visible")
+        login_page.login_button.click()
         assert login_page.get_error_message(), "Expected an error message but none appeared"
 
     def test_both_fields_empty(self, login_page: LoginPage):
         """Submitting with both fields empty should show an error."""
-        login_page.login("", "")
+        login_page.enter_email("")
         assert login_page.get_error_message(), "Expected an error message but none appeared"
 
     def test_invalid_email_format(self, login_page: LoginPage):
         """A malformed email address should show an error."""
-        login_page.login("notanemail", "SomePassword123!")
+        login_page.enter_email("notanemail")
         assert login_page.get_error_message(), "Expected an error message but none appeared"
 
 
 class TestLoginPageUI:
     """Tests for UI elements and navigation on the login page."""
 
-    def test_forgot_password_link_navigates(self, login_page: LoginPage):
-        """Clicking Forgot Password should navigate away from the login page."""
+    def test_forgot_password_link_navigates(self, login_page: LoginPage, credentials):
+        """Clicking Forgot Password should navigate to the password reset page."""
+        login_page.enter_email(credentials["email"])
+        login_page.password_input.wait_for(state="visible")
         login_page.click_forgot_password()
-        assert "reset" in login_page.page.url or "forgot" in login_page.page.url, \
-            "Expected to land on a password reset page"
+        assert "reset" in login_page.page.url or "forgot" in login_page.page.url or \
+            "password-reset" in login_page.page.url, \
+            f"Expected password reset URL, got: {login_page.page.url}"
 
     def test_password_field_masked_by_default(self, login_page: LoginPage, credentials):
         """Password field should be type=password (masked) by default."""
-        login_page.password_input.fill(credentials["password"])
+        login_page.enter_email(credentials["email"])
+        login_page.password_input.wait_for(state="visible")
         field_type = login_page.password_input.get_attribute("type")
         assert field_type == "password", "Password field should be masked by default"
 
     def test_login_page_title(self, login_page: LoginPage):
         """The login page should have the correct page title."""
-        assert "Hudl" in login_page.page.title(), "Expected 'Hudl' in the page title"
+        assert "Log In" in login_page.page.title(), \
+            f"Unexpected page title: {login_page.page.title()}"

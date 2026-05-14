@@ -1,4 +1,4 @@
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
 
 
 class LoginPage:
@@ -7,36 +7,54 @@ class LoginPage:
     def __init__(self, page: Page):
         self.page = page
 
-        # Locators
-        self.email_input = page.get_by_label("Email")
-        self.password_input = page.get_by_label("Password")
-        self.login_button = page.get_by_role("button", name="Log In")
-        self.error_message = page.locator("[data-qa='error-display']")
-        self.forgot_password_link = page.get_by_role("link", name="Forgot Password")
-        self.password_toggle = page.locator("[data-qa='password-visibility-toggle']")
+        # Step 1 - Email
+        self.email_input = page.locator('input.u-input[type="email"]')
+        self.continue_button = page.locator('button[type="submit"]')
+
+        # Step 2 - Password
+        self.password_input = page.locator('input.u-input[type="password"]')
+        self.login_button = page.locator('button[type="submit"]')
+
+        # Other elements
+        self.forgot_password_link = page.get_by_text("Forgot Password", exact=False)
+        self.error_message = page.locator('.u-alert, [class*="error"], [class*="alert"]')
 
     def navigate(self):
-        """Go to the login page."""
+        """Navigate to the Hudl login page and wait for it to load."""
         self.page.goto(self.URL)
+        self.email_input.wait_for(state="visible")
 
-    def login(self, email: str, password: str):
-        """Fill in credentials and submit the login form."""
+    def enter_email(self, email: str):
+        """Fill in email and click Continue."""
         self.email_input.fill(email)
+        self.continue_button.click()
+
+    def enter_password(self, password: str):
+        """Wait for password field, fill it in and submit."""
+        self.password_input.wait_for(state="visible")
         self.password_input.fill(password)
         self.login_button.click()
 
+    def login(self, email: str, password: str):
+        """Full two-step login flow."""
+        self.enter_email(email)
+        self.enter_password(password)
+
     def get_error_message(self) -> str:
         """Return the visible error message text."""
-        return self.error_message.inner_text()
+        self.error_message.first.wait_for(state="visible", timeout=8000)
+        return self.error_message.first.inner_text()
 
     def is_logged_in(self) -> bool:
-        """Check if login was successful by verifying URL change."""
-        return "/login" not in self.page.url
-
-    def toggle_password_visibility(self):
-        """Click the show/hide password toggle."""
-        self.password_toggle.click()
+        """Check if login succeeded by verifying URL no longer contains login."""
+        self.page.wait_for_url(
+            lambda url: "login" not in url and "identity" not in url,
+            timeout=15000
+        )
+        return "login" not in self.page.url
 
     def click_forgot_password(self):
-        """Click the forgot password link."""
-        self.forgot_password_link.click()
+        """Click the Forgot Password link."""
+        self.forgot_password_link.first.wait_for(state="visible")
+        self.forgot_password_link.first.click()
+        self.page.wait_for_load_state("networkidle")
