@@ -1,6 +1,3 @@
-import pytest
-from conftest import credentials
-from pages import login_page
 from pages.login_page import LoginPage
 
 
