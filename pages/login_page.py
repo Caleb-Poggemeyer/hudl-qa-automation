@@ -1,3 +1,12 @@
+"""
+Page Object Model for the Hudl Login Page.
+
+Captures all element locators and user actions in one place.
+If the page changes, update it here and all tests stay working.
+
+Hudl uses a two-step login (email first, then password) via Auth0.
+"""
+
 from playwright.sync_api import Page
 
 
@@ -5,6 +14,7 @@ class LoginPage:
     URL = "https://www.hudl.com/login"
 
     def __init__(self, page: Page):
+        """ Finds the elements on the login page and defines methods to interact with them. """
         self.page = page
 
         # Step 1 - Email
@@ -36,7 +46,7 @@ class LoginPage:
         self.login_button.click()
 
     def login(self, email: str, password: str):
-        """Full two-step login flow."""
+        """Full two-step login flow. Note that email is first step, then password."""
         self.enter_email(email)
         self.enter_password(password)
 

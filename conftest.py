@@ -1,11 +1,18 @@
+"""
+Conftest - Shared fixtures for pytest.
+
+Defines reusable setup for credentials and the login page.
+Credentials are loaded securely from a local .env file and never committed to GitHub.
+"""
+
 import pytest
 import os
 from dotenv import load_dotenv
 from playwright.sync_api import Page
 from pages.login_page import LoginPage
 
+"""Reads the .env file and defines fixtures for credentials and the login page (email and password)."""
 load_dotenv()
-
 
 @pytest.fixture(scope="session")
 def credentials():
