@@ -8,7 +8,7 @@ A production-ready test automation framework validating the Hudl login flow, bui
 
 ## Tech Stack
 
-- **Language:** Python 3.8+
+- **Language:** Python 3.11
 - **Framework:** Playwright
 - **Test Runner:** pytest
 - **Reporting:** pytest-html
@@ -21,7 +21,7 @@ A production-ready test automation framework validating the Hudl login flow, bui
 
 Ensure the following are installed before getting started:
 
-- [Python 3.8+](https://www.python.org/downloads/)
+- [Python 3.11](https://www.python.org/downloads/)
 - [Node.js](https://nodejs.org/) (required by Playwright internally)
 - [Git](https://git-scm.com/)
 

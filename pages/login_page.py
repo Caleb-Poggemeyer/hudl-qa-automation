@@ -64,6 +64,11 @@ class LoginPage:
         self.email_input.fill(email)
         self._submit_button.click()
 
+    def advance_to_password_step(self, email: str):
+        """Submit the email step and wait for the password field to appear."""
+        self.enter_email(email)
+        self.password_input.wait_for(state="visible")
+
     def enter_password(self, password: str):
         """Wait for the password field to appear, fill it in, and submit."""
         self.password_input.wait_for(state="visible")
@@ -75,17 +80,23 @@ class LoginPage:
         self.enter_email(email)
         self.enter_password(password)
 
+    def submit_empty_password(self):
+        """Advance past the email step and submit without filling in a password."""
+        self.password_input.wait_for(state="visible")
+        self._submit_button.click()
+
     def get_error_message(self) -> str:
         """Wait for an error to appear and return its text."""
         self.error_message.first.wait_for(state="visible", timeout=8000)
         return self.error_message.first.inner_text()
 
     def is_logged_in(self) -> bool:
-        """Return True if the URL has left the login/identity pages."""
+        """Return True if the URL has left login/identity pages and the global nav is visible."""
         self.page.wait_for_url(
             lambda url: "login" not in url and "identity" not in url,
             timeout=15000,
         )
+        self.page.locator('[data-qa-id="gloabl-navbar"]').wait_for(state="visible", timeout=5000)
         return "login" not in self.page.url
 
     def click_forgot_password(self):
