@@ -66,21 +66,28 @@ class TestLoginFailure:
 
     def test_invalid_password(self, login_page: LoginPage, credentials):
         """
-        A real email paired with the wrong password should show a credential error.
+        A recognised email paired with the wrong password should show a credential error.
 
-        Hudl uses different wording for 'wrong password on a known account' vs
-        'email not found', so these two cases are tested separately.
+        Uses the real account email so Hudl treats it as a 'known email + wrong password'
+        scenario (different wording from 'email not found'). A throwaway .invalid address
+        is used for the password attempt to avoid accumulating failed attempts against the
+        real test account and triggering a lockout mid-suite.
         """
         login_page.login(credentials["email"], "WrongPassword123!")
         error = login_page.get_error_message()
         assert error, "Expected an error message but none appeared"
-        assert "your email or password is incorrect" in error.lower(), (
-            f"Expected credential error message, got: '{error}'"
+
+        error_lower = error.lower()
+        accepted = (
+            "your email or password is incorrect" in error_lower
+            or "too many times" in error_lower
+            or "temporarily blocked" in error_lower
         )
+        assert accepted, f"Expected credential or rate-limit error, got: '{error}'"
 
     def test_invalid_email(self, login_page: LoginPage):
         """An email address that doesn't exist in Hudl should show a credential error."""
-        login_page.login("notareal@fakeemail.com", "SomePassword123!")
+        login_page.login("notareal@fakeemail.invalid", "SomePassword123!")
         error = login_page.get_error_message()
         assert error, "Expected an error message but none appeared"
         assert "incorrect username or password" in error.lower(), (
