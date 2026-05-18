@@ -188,8 +188,8 @@ class TestLoginRateLimiting:
     attempts.
     """
 
-    _ATTEMPT_COUNT  = 5
-    _PROBE_EMAIL    = "lockout-probe@example-hudl-test.invalid"
+    _ATTEMPT_COUNT = 5
+    _PROBE_EMAIL = "lockout-probe@example-hudl-test.invalid"
     _PROBE_PASSWORD = "WrongPassword999!"
 
     @pytest.mark.security
@@ -312,7 +312,6 @@ class TestKeyboardAccessibility:
         The test passes whether the form accepts or rejects the email — either way
         it confirms Enter triggered a submission.
         """
-
         # 1. Tab to the email field — up to 10 presses to skip any links above it.
         focused = None
         for _ in range(10):
@@ -345,7 +344,7 @@ class TestKeyboardAccessibility:
 
         submitted = login_page.wait_for_password_field(timeout=6000)
         if not submitted:
-            # The email wasn't recognised, a validation error appeared instead.
+            # The email wasn't recognised — a validation error appeared instead.
             # Either outcome means Enter worked.
             error = login_page.get_error_message()
             submitted = bool(error)

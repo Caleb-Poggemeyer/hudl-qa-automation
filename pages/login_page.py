@@ -18,14 +18,14 @@ class LoginPage:
     URL = "https://www.hudl.com/login"
 
     # Selectors — update these if Hudl changes the page HTML.
-    _EMAIL_INPUT     = 'input.u-input[type="email"]'
-    _PASSWORD_INPUT  = 'input.u-input[type="password"]'
-    _SUBMIT_BUTTON   = 'button[type="submit"]'
+    _EMAIL_INPUT = 'input.u-input[type="email"]'
+    _PASSWORD_INPUT = 'input.u-input[type="password"]'
+    _SUBMIT_BUTTON = 'button[type="submit"]'
     _FORGOT_PASSWORD = "Forgot Password"
     _ERROR_SELECTORS = '.u-alert, [class*="error"], [class*="alert"]'
-    _SSO_GOOGLE      = "Continue with Google"
-    _SSO_APPLE       = "Continue with Apple"
-    _SSO_FACEBOOK    = "Continue with Facebook"
+    _SSO_GOOGLE = "Continue with Google"
+    _SSO_APPLE = "Continue with Apple"
+    _SSO_FACEBOOK = "Continue with Facebook"
 
     def __init__(self, page: Page):
         self.page = page
