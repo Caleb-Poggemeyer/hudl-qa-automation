@@ -11,8 +11,9 @@ from dotenv import load_dotenv
 from playwright.sync_api import Page
 from pages.login_page import LoginPage
 
-"""Reads the .env file and defines fixtures for credentials and the login page (email and password)."""
+# Reads .env and defines fixtures for credentials and the login page.
 load_dotenv()
+
 
 @pytest.fixture(scope="session")
 def credentials():

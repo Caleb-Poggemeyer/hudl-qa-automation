@@ -1,5 +1,7 @@
 # Hudl Login Test Automation
 
+[![CI](https://github.com/Caleb-Poggemeyer/hudl-qa-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/Caleb-Poggemeyer/hudl-qa-automation/actions/workflows/ci.yml)
+
 A production-ready test automation framework validating the Hudl login flow, built with Python and Playwright.
 
 ---
@@ -11,6 +13,7 @@ A production-ready test automation framework validating the Hudl login flow, bui
 - **Test Runner:** pytest
 - **Reporting:** pytest-html
 - **Linting:** flake8
+- **CI:** GitHub Actions
 
 ---
 
@@ -134,24 +137,39 @@ A clean run produces no output.
 
 ---
 
+## Debugging Failures
+
+When a test fails, three resources are available:
+
+1. **HTML report** at `reports/report.html` — generated automatically after every run; includes per-test pass/fail status and captured output.
+2. **Headed mode** — re-run the failing test with `--headed` to watch the browser in real time.
+3. **Slow motion** — combine `--headed --slowmo 1000` (milliseconds) to step through interactions at a readable pace.
+
+In CI, the HTML report is uploaded as a workflow artifact and can be downloaded from the Actions run summary.
+
+---
+
 ## Project Structure
 
 ```
 hudl-qa-automation/
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # GitHub Actions: lint → test on every push/PR
 ├── pages/
 │   ├── __init__.py
-│   └── login_page.py       # Page Object Model for the Hudl login page
+│   └── login_page.py           # Page Object Model for the Hudl login page
 ├── tests/
 │   ├── __init__.py
-│   └── test_login.py       # Full login test suite
-├── .env                    # Local credentials (never committed)
-├── .env.example            # Credential template (safe to commit)
-├── .flake8                 # Linting configuration
-├── .gitignore              # Git ignore rules
-├── conftest.py             # Shared pytest fixtures and browser setup
-├── pytest.ini              # Pytest configuration
-├── requirements.txt        # Project dependencies
-└── README.md               # This file
+│   └── test_login.py           # Full login test suite
+├── .env                        # Local credentials (never committed)
+├── .env.example                # Credential template (safe to commit)
+├── .flake8                     # Linting configuration
+├── .gitignore                  # Git ignore rules
+├── conftest.py                 # Shared pytest fixtures and browser setup
+├── pytest.ini                  # Pytest configuration
+├── requirements.txt            # Project dependencies
+└── README.md                   # This file
 ```
 
 ---
@@ -159,23 +177,28 @@ hudl-qa-automation/
 ## Test Coverage
 
 | Category | Test | Description |
-|----------|------|-------------|
+|---|---|---|
 | ✅ Success | `test_valid_login` | Valid credentials log the user in |
-| ❌ Failure | `test_invalid_password` | Valid email with wrong password shows error |
-| ❌ Failure | `test_invalid_email` | Unrecognised email shows error |
-| ❌ Failure | `test_empty_email` | Empty email submission shows error |
-| ❌ Failure | `test_empty_password` | Empty password submission shows error |
-| ❌ Failure | `test_both_fields_empty` | Both fields empty shows error |
-| ❌ Failure | `test_invalid_email_format` | Malformed email shows error |
-| 🖥️ UI | `test_forgot_password_link_navigates` | Forgot Password link navigates correctly |
-| 🖥️ UI | `test_password_field_masked_by_default` | Password field is masked by default |
-| 🖥️ UI | `test_login_page_title` | Page title is correct |
+| ✅ Success | `test_valid_login_email_case_insensitive` | Email matching is case-insensitive |
+| ❌ Failure | `test_invalid_password` | Valid email + wrong password shows a credential error |
+| ❌ Failure | `test_invalid_email` | Unrecognised email shows an error |
+| ❌ Failure | `test_empty_email` | Submitting with no email shows a validation error |
+| ❌ Failure | `test_empty_password` | Submitting with no password shows a validation error |
+| ❌ Failure | `test_invalid_email_format` | Malformed email address shows a format error |
+| ❌ Failure | `test_malicious_or_extreme_input_does_not_crash` | SQL injection, XSS, and 256-char inputs are handled gracefully (parametrized) |
+| 🖥️ UI | `test_login_page_title` | Browser tab title identifies the login page |
+| 🖥️ UI | `test_password_field_masked_by_default` | Password field is type=password by default |
+| 🖥️ UI | `test_forgot_password_link_navigates` | Forgot Password link navigates to the reset page |
+| 🖥️ UI | `test_email_field_present_on_load` | Email field is visible immediately on page load |
+| 🖥️ UI | `test_password_field_not_visible_before_email_step` | Password field is hidden before email is submitted |
 
 ---
 
 ## Design Decisions
 
-- **Page Object Model (POM):** All page interactions are encapsulated in `pages/login_page.py`, keeping tests clean and maintainable.
-- **Two-step login handling:** Hudl's login flow uses a two-step form (email first, then password). The Page Object handles both steps transparently.
+- **Page Object Model (POM):** All page interactions are encapsulated in `pages/login_page.py`, keeping tests selector-free and resilient to UI changes.
+- **Lazy locator resolution:** Submit-button locators are resolved via properties at call time (not at `__init__`), so they always reflect the DOM state of whichever login step is currently active.
+- **Two-step login handling:** Hudl's Auth0 login flow presents email and password on separate steps. The Page Object handles both transparently.
+- **Specific error assertions:** Failure tests assert not just that *an* error appeared but that its text matches expected phrasing, making failures actionable.
 - **Secure credential handling:** Credentials are loaded from a `.env` file at runtime using `python-dotenv` and are never hardcoded or committed.
-- **HTML reporting:** Test results are automatically saved to `reports/report.html` after every run.
+- **CI/CD:** GitHub Actions runs flake8 then the full test suite on every push and pull request, uploading the HTML report as an artifact.
