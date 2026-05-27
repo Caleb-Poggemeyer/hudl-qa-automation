@@ -10,7 +10,7 @@ Test classes
   TestLoginRateLimiting     Page stability under repeated failed attempts.
   TestSSOEntryPoints        Google, Apple, and Facebook sign-in redirects.
   TestLoginPageUI           Page title, password masking, Forgot Password link,
-                            and field visibility at each step.
+                            field visibility at each step, and Create Account button.
   TestKeyboardAccessibility Tab order and Enter-key form submission.
 
 Design notes
@@ -291,6 +291,22 @@ class TestLoginPageUI:
         """The password field should be hidden until the user has entered their email."""
         assert not login_page.is_password_field_visible(), (
             "Password field should not be visible before the email step"
+        )
+
+    def test_create_account_button_is_visible(self, login_page: LoginPage):
+        """The Create Account button/link should be visible on the login page."""
+        assert login_page.is_create_account_button_visible(), (
+            "Expected a 'Create Account' button to be visible on the login page"
+        )
+
+    def test_create_account_button_navigates(self, login_page: LoginPage):
+        """Clicking Create Account should land the user on a Hudl registration page."""
+        destination = login_page.click_create_account()
+        assert "hudl.com" in destination, (
+            f"Expected to stay on hudl.com after clicking Create Account, got: '{destination}'"
+        )
+        assert any(kw in destination for kw in ("register", "sign-up", "signup", "create")), (
+            f"Expected a registration URL, got: '{destination}'"
         )
 
 

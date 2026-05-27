@@ -26,6 +26,7 @@ class LoginPage:
     _SSO_GOOGLE = "Continue with Google"
     _SSO_APPLE = "Continue with Apple"
     _SSO_FACEBOOK = "Continue with Facebook"
+    _CREATE_ACCOUNT = "Create Account"
 
     def __init__(self, page: Page):
         self.page = page
@@ -69,6 +70,10 @@ class LoginPage:
     def sso_facebook_button(self):
         return self.page.get_by_role("button", name=self._SSO_FACEBOOK)
 
+    @property
+    def create_account_button(self):
+        return self.page.get_by_role("link", name=self._CREATE_ACCOUNT, exact=False)
+
     # ------------------------------------------------------------------
     # Navigation
     # ------------------------------------------------------------------
@@ -88,6 +93,13 @@ class LoginPage:
         self.forgot_password_link.first.wait_for(state="visible")
         self.forgot_password_link.first.click()
         self.page.wait_for_load_state("networkidle")
+
+    def click_create_account(self) -> str:
+        """Click 'Create Account' and return the URL the browser lands on."""
+        self.create_account_button.wait_for(state="visible")
+        self.create_account_button.click()
+        self.page.wait_for_load_state("networkidle")
+        return self.page.url
 
     # ------------------------------------------------------------------
     # Form actions
@@ -162,6 +174,10 @@ class LoginPage:
     def is_password_field_visible(self) -> bool:
         """Return True if the password field is visible on screen."""
         return self.password_input.is_visible()
+
+    def is_create_account_button_visible(self) -> bool:
+        """Return True if the Create Account button/link is visible on screen."""
+        return self.create_account_button.is_visible()
 
     def get_password_field_type(self) -> str:
         """Return the input type of the password field (should always be 'password', not 'text')."""
